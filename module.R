@@ -52,7 +52,7 @@ server <- function(input, output) {
                 }
             }
             
-            new_data <- write_xlsx(data[,indice], paste0("modifications/",sep[1,1],"-",sep[2,1],".xlsx",sep=""))
+            new_data <- write_xlsx(data[,indice], paste0("../modifications/",sep[1,1],"-",sep[2,1],".xlsx",sep=""))
             cat(paste0("OK: modifications/",sep[1,1],"-",sep[2,1],".xlsx"))
         }
         cat("OK!")
