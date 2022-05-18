@@ -1,3 +1,23 @@
+
+##### Vérification de mises à jour
+
+version = "1.0.4"
+check_version = read.table("https://raw.githubusercontent.com/clementfarfait/adresse/main/version")
+print("*******************")
+print("*   Mise à jour   *")
+print("*******************")
+print(" ")
+if(check_version$V1[1] != version){
+    print("Une mise à jour est nécessaire.")
+    print("Téléchargement..")
+    download.file("https://raw.githubusercontent.com/clementfarfait/adresse/main/module.R","module.R")
+    print("Mise à jour terminé")
+} else {
+    print("Aucune nécessaire")
+}
+
+##### Vérification des fichiers d'installation
+
 if(file.exists("install.R")){
     file.remove("install.R")
 }
@@ -5,11 +25,15 @@ if(file.exists("install.cmd")){
     file.remove("install.cmd")
 }
 
+##### Chargement des packages et paramètres
+
 options(shiny.maxRequestSize = 30*1024^2)
 library(stringr)
 library(readxl)
 library(writexl)
 library(shiny)
+
+##### Code client
 
 ui <- fluidPage(
     titlePanel("Correction d'adresse"),
@@ -24,6 +48,8 @@ ui <- fluidPage(
         )
     )
 )
+
+##### Code serveur
 
 server <- function(input, output) {
     output$contents <- renderTable({
