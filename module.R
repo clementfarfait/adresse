@@ -1,4 +1,4 @@
-version = read.table("modules/version.txt")
+version = read.table("version.txt")
 version = version$V1[1]
 
 ##### Code client
