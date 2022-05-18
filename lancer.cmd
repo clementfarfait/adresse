@@ -1,1 +1,0 @@
-"C:/Program Files/R/R-4.0.0/bin/R.exe" -e "shiny::runApp('module.R', launch.browser = TRUE)"
