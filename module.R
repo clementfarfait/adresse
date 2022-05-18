@@ -1,7 +1,10 @@
+version = read.table("modules/version.txt")
+version = version$V1[1]
+
 ##### Code client
 
 ui <- fluidPage(
-    titlePanel("Correction d'adresse"),
+    titlePanel(paste0("Correction d'adresse - "),version),
 
     sidebarLayout(
         sidebarPanel(
