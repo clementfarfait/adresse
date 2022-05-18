@@ -1,38 +1,3 @@
-
-##### Vérification de mises à jour
-
-version = "1.0.4"
-check_version = read.table("https://raw.githubusercontent.com/clementfarfait/adresse/main/version")
-print("*******************")
-print("*   Mise à jour   *")
-print("*******************")
-print(" ")
-if(check_version$V1[1] != version){
-    print("Une mise à jour est nécessaire.")
-    print("Téléchargement..")
-    download.file("https://raw.githubusercontent.com/clementfarfait/adresse/main/module.R","module.R")
-    print("Mise à jour terminé")
-} else {
-    print("Aucune nécessaire")
-}
-
-##### Vérification des fichiers d'installation
-
-if(file.exists("install.R")){
-    file.remove("install.R")
-}
-if(file.exists("install.cmd")){
-    file.remove("install.cmd")
-}
-
-##### Chargement des packages et paramètres
-
-options(shiny.maxRequestSize = 30*1024^2)
-library(stringr)
-library(readxl)
-library(writexl)
-library(shiny)
-
 ##### Code client
 
 ui <- fluidPage(
@@ -68,7 +33,7 @@ server <- function(input, output) {
         for(i in 1:length(replace$correction)){
             replace[i,2] <- str_replace(replace[i,2], pattern = "vide", replacement = " ")
         }
-        print(replace)
+        cat(replace)
         
         for(i in 1:length(new_text[,1])){
             sep <- as.data.frame(str_split(new_text[i,1], ":"))
@@ -88,9 +53,9 @@ server <- function(input, output) {
             }
             
             new_data <- write_xlsx(data[,indice], paste0("modifications/",sep[1,1],"-",sep[2,1],".xlsx",sep=""))
-            print(paste0("OK: modifications/",sep[1,1],"-",sep[2,1],".xlsx"))
+            cat(paste0("OK: modifications/",sep[1,1],"-",sep[2,1],".xlsx"))
         }
-        print("OK!")
+        cat("OK!")
     })
     
     output$value <- renderText({ input$caption })
