@@ -6,6 +6,7 @@ library(stringr)
 library(readxl)
 library(writexl)
 library(crayon)
+library(stringi)
 
 ##### Code client
 
