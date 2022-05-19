@@ -1,4 +1,5 @@
 adresse;correction
+ENT ;ENTREE 
 LOT ;LOTISSEMENT 
 RTE ;ROUTE 
 PL ;PLACE 
@@ -13,7 +14,6 @@ apostrophe;vide
 -;vide
 URUE;UR
 BAT ;BATIMENT 
-ENT ;ENTREE 
 ALL ;ALLEE 
 PKG ;PARKING 
 QU ;QUAI 
