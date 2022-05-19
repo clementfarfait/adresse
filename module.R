@@ -6,13 +6,12 @@ library(stringr)
 library(readxl)
 library(writexl)
 library(crayon)
-library(stringi)
 
 ##### Code client
 
-ui <- fluidPage(
-    titlePanel(paste0("Correction d'adresse - ",version)),
-
+ui <- navbarPage(paste0("Transformers - ",version),
+    tabPanel("Adresse"),
+    
     sidebarLayout(
         sidebarPanel(
             textInput("input1", "feuille:col;feuille2:col", value = "", width = NULL, placeholder = NULL),
