@@ -32,43 +32,41 @@ ui <- navbarPage(paste0("Transformers - ",version), id="Adresse",
 server <- function(input, output) {
     
     observeEvent(input$lancer, {
-        inFile <- input$file1
         
-        if (is.null(inFile))
-            return(NULL)
+        shinyalert("Traitement en cours","Veuillez patienter quelques secondes", type = "info", timer = 3000)
         
-        new_text = input$s_input1
-        
-        replace <- read.table("https://raw.githubusercontent.com/clementfarfait/transformers/main/modifications", sep=";", header=TRUE)
-        for(i in 1:length(replace$adresse)){
-            replace[i,1] <- str_replace(replace[i,1], pattern = "apostrophe", replacement = "'")
-        }
-        for(i in 1:length(replace$correction)){
-            replace[i,2] <- str_replace(replace[i,2], pattern = "vide", replacement = " ")
-        }
-        
-        time <- system.time(
-            withProgress(message = 'Traitement..', detail = paste0("[0%]"), value = 0, {
-                sep <- as.data.frame(str_split(new_text, " : "))
-                data <- read_excel(inFile$datapath, sheet = sep[1,1])
-                
-                for(z in 1:length(colnames(data))){
-                    if(colnames(data[z]) == sep[2,1]){
-                        indice = z
-                    }
+        time <- system.time({
+            inFile <- input$file1
+            
+            if (is.null(inFile))
+                return(NULL)
+            
+            new_text = input$s_input1
+            
+            replace <- read.table("https://raw.githubusercontent.com/clementfarfait/transformers/main/modifications", sep=";", header=TRUE)
+            for(i in 1:length(replace$adresse)){
+                replace[i,1] <- str_replace(replace[i,1], pattern = "apostrophe", replacement = "'")
+            }
+            for(i in 1:length(replace$correction)){
+                replace[i,2] <- str_replace(replace[i,2], pattern = "vide", replacement = " ")
+            }
+            
+            sep <- as.data.frame(str_split(new_text, " : "))
+            data <- read_excel(inFile$datapath, sheet = sep[1,1])
+            
+            for(z in 1:length(colnames(data))){
+                if(colnames(data[z]) == sep[2,1]){
+                    indice = z
+                    break
                 }
-                
-                n = nrow(data[,indice])
-                
-                for(p in 1:nrow(data[,indice])){
-                    data[p,indice] <- toupper(data[p,indice])
-                    data[p,indice] <- stri_replace_all_regex(data[p,indice], pattern = as.character(replace$adresse), replacement = as.character(replace$correction), vectorize = FALSE)
-                    setProgress(value = p/n, detail = paste0("[",round(p/n*100,1),"% - ",p,"]"))
-                }
-                
-                new_data <- write_xlsx(data[,indice], paste0("../modifications/",sep[1,1],"-",sep[2,1],".xlsx",sep=""))
-            })
-        )
+            }
+            
+            n = nrow(data[,indice])
+            d <- as.list(data[,indice])
+            d <- lapply(d, stri_replace_all_regex, pattern=as.character(replace$adresse),replacement=as.character(replace$correction),vectorize_all=FALSE)
+            d <- as.data.frame(d)
+            new_data <- write_xlsx(d, paste0("../modifications/",sep[1,1],"-",sep[2,1],".xlsx",sep=""))
+        })
         
         time <- as.integer(time[3])
         if(time > 60){
