@@ -107,7 +107,8 @@ server <- function(input, output) {
         }
         updateSelectInput(getDefaultReactiveDomain(),"s_input1",label = "Colonne", choices=as.vector(v))
         
-        cat("Fichier importé avec succès")
+        shinyalert("Fichier importé avec succès","Veuillez sélectionner la colonne à traiter", type = "success")
+        cat("")
     })
 }
 
