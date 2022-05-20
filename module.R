@@ -2,6 +2,7 @@ version = read.table("version.txt")
 version = version$V1[1]
 
 options(shiny.maxRequestSize = 30*1024^2)
+options(warn = -1)
 library(stringr)
 library(readxl)
 library(writexl)
