@@ -39,7 +39,7 @@ server <- function(input, output) {
         
         new_text = input$s_input1
         
-        replace <- read.table("https://raw.githubusercontent.com/clementfarfait/adresse/main/modifications", sep=";", header=TRUE)
+        replace <- read.table("https://raw.githubusercontent.com/clementfarfait/transformers/main/modifications", sep=";", header=TRUE)
         for(i in 1:length(replace$adresse)){
             replace[i,1] <- str_replace(replace[i,1], pattern = "apostrophe", replacement = "'")
         }
