@@ -21,9 +21,9 @@ ui <- navbarPage(paste0("Transformers - ",version), id="Adresse",
     
     sidebarLayout(
         sidebarPanel(
-            fileInput("file1", "Fichier excel", accept=".xlsx", multiple=TRUE, buttonLabel = "Parcourir", placeholder = "Aucun fichier sélectionné"),
-            selectInput("s_input1", label="Colonne", choices=c("Aucun fichier sélectionné")),
-            actionButton("lancer","Lancer le traitement")
+            fileInput("file1", "Fichier excel", accept=".xlsx", buttonLabel = "Parcourir", placeholder = "Aucun fichier sélectionné"),
+            selectInput("s_input1", label="Colonnes", choices=c("Aucun fichier sélectionné"),multiple=TRUE),
+            actionButton("lancer","Lancer le traitement"),
         ),
         mainPanel(
             tableOutput("contents"),
@@ -43,19 +43,21 @@ server <- function(input, output) {
             if (is.null(inFile))
                 return(NULL)
             new_text = input$s_input1
-            sep <- as.data.frame(str_split(new_text, " : "))
-            data <- read_excel(inFile$datapath, sheet = sep[1,1])
-            for(z in 1:length(colnames(data))){
-                if(colnames(data[z]) == sep[2,1]){
-                    indice = z
-                    break
+            for(i in 1:length(input$s_input1)){
+                sep <- as.data.frame(str_split(new_text[i], " : "))
+                data <- read_excel(inFile$datapath, sheet = sep[1,1])
+                for(z in 1:length(colnames(data))){
+                    if(colnames(data[z]) == sep[2,1]){
+                        indice = z
+                        break
+                    }
                 }
+                n = nrow(data[,indice])
+                d <- as.list(data[,indice])
+                d <- lapply(d, stri_replace_all_regex, pattern=as.character(replace$adresse),replacement=as.character(replace$correction),vectorize_all=FALSE)
+                d <- as.data.frame(d)
+                new_data <- write_xlsx(d, paste0("../modifications/",sep[1,1],"-",sep[2,1],".xlsx",sep=""))
             }
-            n = nrow(data[,indice])
-            d <- as.list(data[,indice])
-            d <- lapply(d, stri_replace_all_regex, pattern=as.character(replace$adresse),replacement=as.character(replace$correction),vectorize_all=FALSE)
-            d <- as.data.frame(d)
-            new_data <- write_xlsx(d, paste0("../modifications/",sep[1,1],"-",sep[2,1],".xlsx",sep=""))
         })
         
         time <- as.integer(time[3])
@@ -92,7 +94,7 @@ server <- function(input, output) {
             }
         }
         updateSelectInput(getDefaultReactiveDomain(),"s_input1",label = "Colonne", choices=as.vector(v))
-        shinyalert("Fichier importé avec succès","Veuillez sélectionner la colonne à traiter", type = "success", immediate = TRUE)
+        shinyalert("Fichier importé avec succès","Veuillez sélectionner les colonnes à traiter", type = "success", immediate = TRUE)
         cat("")
     })
 }
