@@ -1,14 +1,20 @@
+##### Chargement de la version et des parametres necessaires
+
 version = read.table("version.txt")
 version = version$V1[1]
-
 options(shiny.maxRequestSize = 30*1024^2)
 options(warn = -1)
+
+##### Chargement des packages necessaires
+
 library(stringr)
 library(readxl)
 library(writexl)
 library(crayon)
 library(stringi)
 library(shinyalert)
+
+##### Liste des remplacements récupérée depuis un git
 
 replace <- read.table("https://raw.githubusercontent.com/clementfarfait/transformers/main/modifications", sep=";", header=TRUE)
 replace$adresse <- lapply(replace$adresse, stri_replace_all_regex, pattern="apostrophe",replacement="'",vectorize_all=FALSE)
@@ -17,18 +23,18 @@ replace$correction <- lapply(replace$correction, stri_replace_all_regex, pattern
 ##### Code client
 
 ui <- navbarPage(paste0("Transformers - ",version), id="Adresse",
-    tabPanel("Adresse"),
-    
-    sidebarLayout(
-        sidebarPanel(
-            fileInput("file1", "Fichier excel", accept=".xlsx", buttonLabel = "Parcourir", placeholder = "Aucun fichier sélectionné"),
-            selectInput("s_input1", label="Colonnes", choices=c("Aucun fichier sélectionné"),multiple=TRUE),
-            actionButton("lancer","Lancer le traitement"),
-        ),
-        mainPanel(
-            tableOutput("contents"),
-        )
-    )
+    tabPanel("Adresse",
+             sidebarLayout(
+                 sidebarPanel(
+                     fileInput("file1", "Fichier excel", accept=".xlsx", buttonLabel = "Parcourir", placeholder = "Aucun fichier sélectionné"),
+                     selectInput("s_input1", label="Colonnes", choices=c("Aucun fichier sélectionné"),multiple=TRUE),
+                     actionButton("lancer","Lancer le traitement"),
+                 ),
+                 mainPanel(
+                     tableOutput("contents"),
+                 )
+             )
+    ),
 )
 
 ##### Code serveur
@@ -46,12 +52,7 @@ server <- function(input, output) {
             for(i in 1:length(input$s_input1)){
                 sep <- as.data.frame(str_split(new_text[i], " : "))
                 data <- read_excel(inFile$datapath, sheet = sep[1,1])
-                for(z in 1:length(colnames(data))){
-                    if(colnames(data[z]) == sep[2,1]){
-                        indice = z
-                        break
-                    }
-                }
+                indice = which(colnames(data) == sep[2,1])
                 n = nrow(data[,indice])
                 d <- as.list(data[,indice])
                 d <- lapply(d, stri_replace_all_regex, pattern=as.character(replace$adresse),replacement=as.character(replace$correction),vectorize_all=FALSE)
@@ -60,7 +61,11 @@ server <- function(input, output) {
             }
         })
         
-        time <- as.integer(time[3])
+        if(time[3] >= 1){
+            time <- as.integer(time[3])
+        } else {
+            time <- round(time[3],digits = 1)
+        }
         if(time > 60){
             time <- round(time / 60)
             if(time > 1){
@@ -78,7 +83,7 @@ server <- function(input, output) {
             time <- paste0(time,t)
         }
         
-        shinyalert(paste0("Modifications terminées\nTemps : ",time),paste0("modifications/",sep[1,1],"-",sep[2,1],".xlsx"), type = "success", immediate = TRUE)
+        shinyalert("Modifications terminées",paste0("Nombre de lignes traitées : ",n,"\nTemps : ",time,"\nDestination du fichier : modifications/",sep[1,1],"-",sep[2,1],".xlsx"), type = "success", immediate = TRUE)
     })
     
     output$contents <- renderTable({
