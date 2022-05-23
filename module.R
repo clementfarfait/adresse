@@ -27,13 +27,6 @@ ui <- navbarPage(paste0("Transformers - ",version), id="Adresse",
         ),
         mainPanel(
             tableOutput("contents"),
-            tags$button(
-                id = 'close',
-                type = "button",
-                class = "btn action-button",
-                onclick = "setTimeout(function(){window.close();},500);",  # close browser
-                "Quitter l'application"
-            )
         )
     )
 )
@@ -41,10 +34,6 @@ ui <- navbarPage(paste0("Transformers - ",version), id="Adresse",
 ##### Code serveur
 
 server <- function(input, output) {
-    
-    observe({
-        if (input$close > 0) stopApp()
-    })
     
     observeEvent(input$lancer, {
         
