@@ -33,35 +33,27 @@ server <- function(input, output) {
     
     observeEvent(input$lancer, {
         
-        shinyalert("Traitement en cours","Veuillez patienter quelques secondes", type = "info", timer = 3000)
-        
+        shinyalert("Démarrage en cours","Veuillez patienter quelques secondes", type = "info", timer = 2000)
+        inFile <- input$file1
+        if (is.null(inFile))
+            return(NULL)
+        new_text = input$s_input1
+        replace <- read.table("https://raw.githubusercontent.com/clementfarfait/transformers/main/modifications", sep=";", header=TRUE)
+        replace$adresse <- lapply(replace$adresse, stri_replace_all_regex, pattern="apostrophe",replacement="'",vectorize_all=FALSE)
+        replace$correction <- lapply(replace$correction, stri_replace_all_regex, pattern="vide",replacement=" ",vectorize_all=FALSE)
+        sep <- as.data.frame(str_split(new_text, " : "))
+        data <- read_excel(inFile$datapath, sheet = sep[1,1])
+        for(z in 1:length(colnames(data))){
+            if(colnames(data[z]) == sep[2,1]){
+                indice = z
+                break
+            }
+        }
+        n = nrow(data[,indice])
+        estimation = as.integer(n / 137)
+        convert = as.integer(round(estimation/1000))
         time <- system.time({
-            inFile <- input$file1
-            
-            if (is.null(inFile))
-                return(NULL)
-            
-            new_text = input$s_input1
-            
-            replace <- read.table("https://raw.githubusercontent.com/clementfarfait/transformers/main/modifications", sep=";", header=TRUE)
-            for(i in 1:length(replace$adresse)){
-                replace[i,1] <- str_replace(replace[i,1], pattern = "apostrophe", replacement = "'")
-            }
-            for(i in 1:length(replace$correction)){
-                replace[i,2] <- str_replace(replace[i,2], pattern = "vide", replacement = " ")
-            }
-            
-            sep <- as.data.frame(str_split(new_text, " : "))
-            data <- read_excel(inFile$datapath, sheet = sep[1,1])
-            
-            for(z in 1:length(colnames(data))){
-                if(colnames(data[z]) == sep[2,1]){
-                    indice = z
-                    break
-                }
-            }
-            
-            n = nrow(data[,indice])
+            shinyalert("Traitement en cours",paste0("Estimation : ",convert," secondes"), type = "info", timer = estimation)
             d <- as.list(data[,indice])
             d <- lapply(d, stri_replace_all_regex, pattern=as.character(replace$adresse),replacement=as.character(replace$correction),vectorize_all=FALSE)
             d <- as.data.frame(d)
