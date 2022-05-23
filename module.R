@@ -10,6 +10,10 @@ library(crayon)
 library(stringi)
 library(shinyalert)
 
+replace <- read.table("https://raw.githubusercontent.com/clementfarfait/transformers/main/modifications", sep=";", header=TRUE)
+replace$adresse <- lapply(replace$adresse, stri_replace_all_regex, pattern="apostrophe",replacement="'",vectorize_all=FALSE)
+replace$correction <- lapply(replace$correction, stri_replace_all_regex, pattern="vide",replacement=" ",vectorize_all=FALSE)
+
 ##### Code client
 
 ui <- navbarPage(paste0("Transformers - ",version), id="Adresse",
@@ -33,27 +37,21 @@ server <- function(input, output) {
     
     observeEvent(input$lancer, {
         
-        shinyalert("Démarrage en cours","Veuillez patienter quelques secondes", type = "info", timer = 2000)
-        inFile <- input$file1
-        if (is.null(inFile))
-            return(NULL)
-        new_text = input$s_input1
-        replace <- read.table("https://raw.githubusercontent.com/clementfarfait/transformers/main/modifications", sep=";", header=TRUE)
-        replace$adresse <- lapply(replace$adresse, stri_replace_all_regex, pattern="apostrophe",replacement="'",vectorize_all=FALSE)
-        replace$correction <- lapply(replace$correction, stri_replace_all_regex, pattern="vide",replacement=" ",vectorize_all=FALSE)
-        sep <- as.data.frame(str_split(new_text, " : "))
-        data <- read_excel(inFile$datapath, sheet = sep[1,1])
-        for(z in 1:length(colnames(data))){
-            if(colnames(data[z]) == sep[2,1]){
-                indice = z
-                break
-            }
-        }
-        n = nrow(data[,indice])
-        estimation = as.integer(n / 137)
-        convert = as.integer(round(estimation/1000))
+        shinyalert("Traitement en cours","Veuillez patienter quelques secondes", type = "info", showConfirmButton = FALSE)
         time <- system.time({
-            shinyalert("Traitement en cours",paste0("Estimation : ",convert," secondes"), type = "info", timer = estimation)
+            inFile <- input$file1
+            if (is.null(inFile))
+                return(NULL)
+            new_text = input$s_input1
+            sep <- as.data.frame(str_split(new_text, " : "))
+            data <- read_excel(inFile$datapath, sheet = sep[1,1])
+            for(z in 1:length(colnames(data))){
+                if(colnames(data[z]) == sep[2,1]){
+                    indice = z
+                    break
+                }
+            }
+            n = nrow(data[,indice])
             d <- as.list(data[,indice])
             d <- lapply(d, stri_replace_all_regex, pattern=as.character(replace$adresse),replacement=as.character(replace$correction),vectorize_all=FALSE)
             d <- as.data.frame(d)
@@ -78,15 +76,13 @@ server <- function(input, output) {
             time <- paste0(time,t)
         }
         
-        shinyalert(paste0("Modifications terminées\nTemps : ",time),paste0("modifications/",sep[1,1],"-",sep[2,1],".xlsx"), type = "success")
+        shinyalert(paste0("Modifications terminées\nTemps : ",time),paste0("modifications/",sep[1,1],"-",sep[2,1],".xlsx"), type = "success", immediate = TRUE)
     })
     
     output$contents <- renderTable({
         inFile <- input$file1
-        
         if (is.null(inFile))
             return(NULL)
-        
         choices <- excel_sheets(inFile$datapath)
         v = c()
         for(i in 1:length(choices)){
@@ -96,8 +92,7 @@ server <- function(input, output) {
             }
         }
         updateSelectInput(getDefaultReactiveDomain(),"s_input1",label = "Colonne", choices=as.vector(v))
-        
-        shinyalert("Fichier importé avec succès","Veuillez sélectionner la colonne à traiter", type = "success")
+        shinyalert("Fichier importé avec succès","Veuillez sélectionner la colonne à traiter", type = "success", immediate = TRUE)
         cat("")
     })
 }
