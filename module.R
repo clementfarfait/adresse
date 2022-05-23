@@ -27,7 +27,7 @@ ui <- navbarPage(paste0("Transformers - ",version), id="Adresse",
              sidebarLayout(
                  sidebarPanel(
                      fileInput("file1", "Fichier excel", accept=".xlsx", buttonLabel = "Parcourir", placeholder = "Aucun fichier sélectionné"),
-                     selectInput("s_input1", label="Colonnes", choices=c("Aucun fichier sélectionné"),multiple=TRUE),
+                     selectInput("s_input1", label="Colonnes", choices=c("Aucun fichier sélectionné"),selected="Aucun fichier sélectionné",multiple=TRUE),
                      actionButton("lancer","Lancer le traitement"),
                  ),
                  mainPanel(
@@ -35,6 +35,16 @@ ui <- navbarPage(paste0("Transformers - ",version), id="Adresse",
                  )
              )
     ),
+    tabPanel("Prochainement",
+             sidebarLayout(
+                 sidebarPanel(
+                 ),
+                 mainPanel(
+                     tableOutput("contents2"),
+                 )
+             )
+    ),
+
 )
 
 ##### Code serveur
